@@ -35,12 +35,12 @@
               <Component id="jPanel1" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
-          <Group type="102" alignment="1" attributes="0">
-              <EmptySpace min="0" pref="304" max="32767" attributes="0"/>
+          <Group type="102" alignment="0" attributes="0">
+              <EmptySpace min="-2" pref="304" max="-2" attributes="0"/>
               <Component id="jButton6" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="jButton4" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace max="32767" attributes="0"/>
               <Component id="jButton7" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="jButton5" min="-2" max="-2" attributes="0"/>
@@ -90,6 +90,7 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="jLabel1" max="32767" attributes="0"/>
                       <Component id="jScrollPane3" max="32767" attributes="0"/>
+                      <Component id="jLabelAlbumTitleAndArtist" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="jScrollPane2" min="-2" pref="212" max="-2" attributes="0"/>
@@ -103,7 +104,9 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" attributes="0">
-                          <Component id="jLabel1" min="-2" pref="278" max="-2" attributes="0"/>
+                          <Component id="jLabel1" min="-2" pref="230" max="-2" attributes="0"/>
+                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                          <Component id="jLabelAlbumTitleAndArtist" min="-2" pref="37" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="jScrollPane3" pref="158" max="32767" attributes="0"/>
                       </Group>
@@ -126,14 +129,11 @@
             <Component class="javax.swing.JList" name="jListAlbums">
               <Properties>
                 <Property name="model" type="javax.swing.ListModel" editor="org.netbeans.modules.form.editors2.ListModelEditor">
-                  <StringArray count="5">
-                    <StringItem index="0" value="Item 1"/>
-                    <StringItem index="1" value="Item 2"/>
-                    <StringItem index="2" value="Item 3"/>
-                    <StringItem index="3" value="Item 4"/>
-                    <StringItem index="4" value="Item 5"/>
+                  <StringArray count="1">
+                    <StringItem index="0" value="Album List"/>
                   </StringArray>
                 </Property>
+                <Property name="name" type="java.lang.String" value="Album List" noResource="true"/>
               </Properties>
               <Events>
                 <EventHandler event="valueChanged" listener="javax.swing.event.ListSelectionListener" parameters="javax.swing.event.ListSelectionEvent" handler="jListAlbumsValueChanged"/>
@@ -154,12 +154,8 @@
             <Component class="javax.swing.JList" name="jList2">
               <Properties>
                 <Property name="model" type="javax.swing.ListModel" editor="org.netbeans.modules.form.editors2.ListModelEditor">
-                  <StringArray count="5">
-                    <StringItem index="0" value="Item 1"/>
-                    <StringItem index="1" value="Item 2"/>
-                    <StringItem index="2" value="Item 3"/>
-                    <StringItem index="3" value="Item 4"/>
-                    <StringItem index="4" value="Item 5"/>
+                  <StringArray count="1">
+                    <StringItem index="0" value="Playlist"/>
                   </StringArray>
                 </Property>
               </Properties>
@@ -187,12 +183,8 @@
             <Component class="javax.swing.JList" name="jList3">
               <Properties>
                 <Property name="model" type="javax.swing.ListModel" editor="org.netbeans.modules.form.editors2.ListModelEditor">
-                  <StringArray count="5">
-                    <StringItem index="0" value="Item 1"/>
-                    <StringItem index="1" value="Item 2"/>
-                    <StringItem index="2" value="Item 3"/>
-                    <StringItem index="3" value="Item 4"/>
-                    <StringItem index="4" value="Item 5"/>
+                  <StringArray count="1">
+                    <StringItem index="0" value="Track list for Album"/>
                   </StringArray>
                 </Property>
               </Properties>
@@ -202,6 +194,12 @@
             </Component>
           </SubComponents>
         </Container>
+        <Component class="javax.swing.JLabel" name="jLabelAlbumTitleAndArtist">
+          <AccessibilityProperties>
+            <Property name="AccessibleContext.accessibleName" type="java.lang.String" value="jLabelAlbumTitleAndArtist"/>
+            <Property name="AccessibleContext.accessibleDescription" type="java.lang.String" value=""/>
+          </AccessibilityProperties>
+        </Component>
       </SubComponents>
     </Container>
     <Component class="javax.swing.JButton" name="jButton1">

@@ -5,12 +5,13 @@ import albuminfoprogram.AlbumCollection;
 import albuminfoprogram.Playlist;
 import albuminfoprogram.PlaylistTrack;
 import albuminfoprogram.Track;
-import java.awt.Dimension;
+import java.awt.Component;
 import java.awt.Image;
 import java.io.File;
-import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
+import java.util.*;
+import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -24,14 +25,15 @@ import javax.swing.JLabel;
 public class MapesUI extends javax.swing.JFrame {
 
    AlbumCollection myAlbumCollection;
+   String workingDir = System.getProperty("user.dir");
 
    /**
     * Creates new form MapesUI
     */
    public MapesUI()
    {
-      initComponents();
-      myAlbumCollection = new AlbumCollection();
+	initComponents();
+	myAlbumCollection = new AlbumCollection();
    }
 
    /**
@@ -53,6 +55,7 @@ public class MapesUI extends javax.swing.JFrame {
       jLabel1 = new javax.swing.JLabel();
       jScrollPane3 = new javax.swing.JScrollPane();
       jList3 = new javax.swing.JList<>();
+      jLabelAlbumTitleAndArtist = new javax.swing.JLabel();
       jButton1 = new javax.swing.JButton();
       jButton2 = new javax.swing.JButton();
       jButton4 = new javax.swing.JButton();
@@ -66,10 +69,11 @@ public class MapesUI extends javax.swing.JFrame {
 
       jListAlbums.setModel(new javax.swing.AbstractListModel<String>()
       {
-         String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+         String[] strings = { "Album List" };
          public int getSize() { return strings.length; }
          public String getElementAt(int i) { return strings[i]; }
       });
+      jListAlbums.setName("Album List"); // NOI18N
       jListAlbums.addListSelectionListener(new javax.swing.event.ListSelectionListener()
       {
          public void valueChanged(javax.swing.event.ListSelectionEvent evt)
@@ -81,7 +85,7 @@ public class MapesUI extends javax.swing.JFrame {
 
       jList2.setModel(new javax.swing.AbstractListModel<String>()
       {
-         String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+         String[] strings = { "Playlist" };
          public int getSize() { return strings.length; }
          public String getElementAt(int i) { return strings[i]; }
       });
@@ -92,7 +96,7 @@ public class MapesUI extends javax.swing.JFrame {
 
       jList3.setModel(new javax.swing.AbstractListModel<String>()
       {
-         String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+         String[] strings = { "Track list for Album" };
          public int getSize() { return strings.length; }
          public String getElementAt(int i) { return strings[i]; }
       });
@@ -108,7 +112,8 @@ public class MapesUI extends javax.swing.JFrame {
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-               .addComponent(jScrollPane3))
+               .addComponent(jScrollPane3)
+               .addComponent(jLabelAlbumTitleAndArtist, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
             .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 212, javax.swing.GroupLayout.PREFERRED_SIZE)
             .addContainerGap())
@@ -119,13 +124,18 @@ public class MapesUI extends javax.swing.JFrame {
             .addContainerGap()
             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                .addGroup(jPanel1Layout.createSequentialGroup()
-                  .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 278, javax.swing.GroupLayout.PREFERRED_SIZE)
+                  .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE)
+                  .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                  .addComponent(jLabelAlbumTitleAndArtist, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                   .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                   .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 158, Short.MAX_VALUE))
                .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING)
                .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING))
             .addContainerGap())
       );
+
+      jLabelAlbumTitleAndArtist.getAccessibleContext().setAccessibleName("jLabelAlbumTitleAndArtist");
+      jLabelAlbumTitleAndArtist.getAccessibleContext().setAccessibleDescription("");
 
       jButton1.setText("Load Albums");
       jButton1.addActionListener(new java.awt.event.ActionListener()
@@ -177,12 +187,12 @@ public class MapesUI extends javax.swing.JFrame {
             .addContainerGap()
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addContainerGap())
-         .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-            .addGap(0, 304, Short.MAX_VALUE)
+         .addGroup(layout.createSequentialGroup()
+            .addGap(304, 304, 304)
             .addComponent(jButton6)
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
             .addComponent(jButton4)
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jButton7)
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
             .addComponent(jButton5)
@@ -217,97 +227,141 @@ public class MapesUI extends javax.swing.JFrame {
 
    private void jButtonPlayActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButtonPlayActionPerformed
    {//GEN-HEADEREND:event_jButtonPlayActionPerformed
-      // TODO add your handling code here:
+	// TODO add your handling code here:
    }//GEN-LAST:event_jButtonPlayActionPerformed
 
    private void jButtonLoadAlbumsActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButtonLoadAlbumsActionPerformed
    {//GEN-HEADEREND:event_jButtonLoadAlbumsActionPerformed
-      System.out.println("Loading albums");
-      // TODO add your handling code here:
-      myAlbumCollection.readAlbumCollectionFromFile("albums.txt");
-      DefaultListModel<String> albumList = new DefaultListModel<>();
-      jListAlbums.setModel(albumList);
-      for (Album album : myAlbumCollection.getAlbums())
-      {
-         albumList.addElement(album.getAlbumTitle());
-      }
+	System.out.println("Loading albums");
+
+	String filename="";
+	
+	// use JFileChooser to select album text file
+	try
+	{
+	   // launch file chooser in current working directory
+	   JFileChooser openFC = new JFileChooser(workingDir);
+	   FileFilter filter = new FileNameExtensionFilter("Text File", "txt");
+	   openFC.setFileFilter(filter);
+	   
+	   Component c1 = null;
+	   openFC.showOpenDialog(c1);
+
+	   File albumListing = openFC.getSelectedFile();
+	   filename = albumListing.getAbsolutePath();
+	   
+	   workingDir = albumListing.getParentFile().getAbsolutePath();
+
+	   System.out.println(filename);
+	   System.out.println(workingDir);
+	   
+	   //check the file format 
+	   String fileType = openFC.getTypeDescription(albumListing);
+	   System.out.println("file type = "+ fileType);
+	} 
+	catch (Exception e)
+	{
+	   System.err.println(e);
+	}
+	
+	
+	myAlbumCollection.readAlbumCollectionFromFile(filename);
+	DefaultListModel<String> albumList = new DefaultListModel<>();
+	jListAlbums.setModel(albumList);
+	for (Album album : myAlbumCollection.getAlbums())
+	{
+	   albumList.addElement(album.getAlbumTitle());
+	}
    }//GEN-LAST:event_jButtonLoadAlbumsActionPerformed
 
    private void jButtonLoadPlaylistActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButtonLoadPlaylistActionPerformed
    {//GEN-HEADEREND:event_jButtonLoadPlaylistActionPerformed
-      System.out.println("Loading playlist");
-      // TODO add your handling code here:
-      Playlist playlist = new Playlist(myAlbumCollection);
-      playlist.loadPlaylist("playlist.txt");
-      DefaultListModel<String> playListModel = new DefaultListModel<>();
-      jList2.setModel(playListModel);
-      for (PlaylistTrack track : playlist.getPlaylistTracks())
-      {
-         playListModel.addElement(track.getTrackTitle());
-      }
+	System.out.println("Loading playlist");
+	
+	// TODO add your handling code here:
+	Playlist playlist = new Playlist(myAlbumCollection);
+	playlist.loadPlaylist("playlist.txt");
+	DefaultListModel<String> playListModel = new DefaultListModel<>();
+	jList2.setModel(playListModel);
+	for (PlaylistTrack track : playlist.getPlaylistTracks())
+	{
+	   playListModel.addElement(track.getTrackTitle());
+	}
    }//GEN-LAST:event_jButtonLoadPlaylistActionPerformed
 
    private void jButtonStopActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButtonStopActionPerformed
    {//GEN-HEADEREND:event_jButtonStopActionPerformed
-      // TODO add your handling code here:
+	// TODO add your handling code here:
    }//GEN-LAST:event_jButtonStopActionPerformed
 
    private void jListAlbumsValueChanged(javax.swing.event.ListSelectionEvent evt)//GEN-FIRST:event_jListAlbumsValueChanged
    {//GEN-HEADEREND:event_jListAlbumsValueChanged
-      // TODO add your handling code here:
-      //System.out.println("Item selected" + jListAlbums.getSelectedValue());
-      DefaultListModel<String> albumDetailsList = new DefaultListModel<>();
-      jList3.setModel(albumDetailsList);
+	// TODO add your handling code here:
+	//System.out.println("Item selected" + jListAlbums.getSelectedValue());
+	DefaultListModel<String> albumDetailsList = new DefaultListModel<>();
+	jList3.setModel(albumDetailsList);
 
-      String albumTitle = jListAlbums.getSelectedValue();
-      Album album = myAlbumCollection.getAlbumByTitle(albumTitle);
-      String albumArtist = album.getAlbumArtist();
+	String albumTitle = jListAlbums.getSelectedValue();
+	// Do nothing if 'Album List' placeholder selected
+	if (albumTitle != null && !albumTitle.equals("Album List"))
+	{
+	   Album album = myAlbumCollection.getAlbumByTitle(albumTitle);
+	   String albumArtist = album.getAlbumArtist();
 
-      // print album details to list
-      albumDetailsList.addElement("Album Title: " + albumTitle);
-      albumDetailsList.addElement("Album Artist: " + albumArtist);
-      albumDetailsList.addElement("Tracks:");
-      for (Track track : album.getTracks())
-      {
-         albumDetailsList.addElement(track.getTrackTitle());
-      }
-      
-      ImageIcon image = new ImageIcon();
-      // get list of image files
-      File folder = new File("images/");
-	
-	// TODO USE HASHMAP FOR THIS
-      File[] fileList = folder.listFiles();
-      for(File file : fileList)
-      {
-         // check file is a file and not a directory
-         if (file.isFile())
-         {
-            String fileName = file.getName();
-            //System.out.println("Filename: " + fileName);
-            String shortTitle = albumTitle.toLowerCase();
-		// remove 'the' from start of album title
-		if(shortTitle.substring(0,4).equals("the "))
+	   // print album details to list
+	   jLabelAlbumTitleAndArtist.setText("<html><body>Album Title &emsp;: "
+		     + albumTitle + "<br>Album Artist&emsp;: "
+		     + albumArtist + "</body></html>");
+
+	   for (Track track : album.getTracks())
+	   {
+		albumDetailsList.addElement(track.getTrackTitle());
+	   }
+
+	   // initiate a new image icon to display album cover
+	   ImageIcon image = new ImageIcon();
+	   // get list of image files
+	   File folder = new File("images/");
+
+	   File[] fileList = folder.listFiles();
+	   //List<File> fileList = new ArrayList<>(Arrays.asList(folder.listFiles()));
+
+	   for (File file : fileList)
+	   {
+		// check file is a file and not a directory
+		if (file.isFile())
 		{
-		   shortTitle = shortTitle.substring(4, shortTitle.length());
+		   String fileName = file.getName();
+		   //System.out.println("Filename: " + fileName);
+		   String shortTitle = albumTitle.toLowerCase();
+		   // remove 'the' from start of album title
+		   if (shortTitle.substring(0, 4).equals("the "))
+		   {
+			shortTitle = shortTitle.substring(4, shortTitle.length());
+		   }
+		   // remove white space and special characters
+		   shortTitle = shortTitle.replaceAll("\\s+", "").replaceAll(
+			     "[-+.^:,?']", "").toLowerCase();
+
+		   // TODO include artist in file title search
+		   // 2nd part of the following OR is a special case designed for 
+		   // Neil's Heavy Concept Album. This is a system limitation and 
+		   // may not be robust. Consider renaming image files to consistent
+		   // format.
+		   if ((fileName.toLowerCase().contains(shortTitle))
+			     || (shortTitle.length() > 20 && fileName.toLowerCase().contains(
+			     shortTitle.substring(5, shortTitle.length() - 5))))
+		   {
+			//System.out.println("Match found");
+			ImageIcon tempImage = new ImageIcon("images/" + fileName);
+			image = getScaledImage(tempImage, jLabel1);
+		   }
 		}
-		// remove white space and special characters
-            shortTitle = shortTitle.replaceAll("\\s+","").replaceAll("[-+.^:,?']","").toLowerCase();
-            //System.out.println("Short title: " + shortTitle);
-            if(fileName.toLowerCase().contains(shortTitle))
-            {
-               //System.out.println("Match found");
-		   ImageIcon tempImage = new ImageIcon("images/" + fileName);
-               image = getScaledImage(tempImage, jLabel1);
-			     //new ImageIcon(tempImage.getImage().getScaledInstance(jLabel1.getWidth(), jLabel1.getHeight(), Image.SCALE_SMOOTH));
-            }
-         } 
-      }
-    
-      jLabel1.setIcon(image);
+	   }
+	   jLabel1.setIcon(image);
+	}
    }//GEN-LAST:event_jListAlbumsValueChanged
 
-   
    // Method to get scaled dimensions of album cover
    private ImageIcon getScaledImage(ImageIcon image, JLabel jLabel)
    {
@@ -316,71 +370,71 @@ public class MapesUI extends javax.swing.JFrame {
 	int imageHeight = image.getIconHeight();
 	int labelWidth = jLabel.getWidth();
 	int labelHeight = jLabel.getHeight();
-	System.out.println(imageWidth + ", " + imageHeight + ", " + labelWidth + ", " + labelHeight);
+	System.out.println(imageWidth + ", " + imageHeight + ", " + labelWidth
+		  + ", " + labelHeight);
 	// variables to store scaled dimensions
 	int scaledWidth;
 	int scaledHeight;
-	
+
 	// match width of image to width of label
 	scaledWidth = labelWidth;
-	scaledHeight = (int) (imageHeight * (labelWidth/(float)imageWidth));
-	
+	scaledHeight = (int) (imageHeight * (labelWidth / (float) imageWidth));
+
 	// if height too great, scale image down to fit height to window
-	if(scaledHeight > labelHeight)
+	if (scaledHeight > labelHeight)
 	{
-	   scaledWidth = (int) (scaledWidth * (labelHeight/(float)scaledHeight));
+	   scaledWidth = (int) (scaledWidth
+		     * (labelHeight / (float) scaledHeight));
 	   scaledHeight = labelHeight;
 	}
-	
+
 	// create and return scaled image
-	return new ImageIcon(image.getImage().getScaledInstance(scaledWidth, 
-					         scaledHeight, Image.SCALE_SMOOTH));
+	return new ImageIcon(image.getImage().getScaledInstance(scaledWidth,
+		  scaledHeight, Image.SCALE_SMOOTH));
    }
-   
-   
-   
+
    /**
     * @param args the command line arguments
     */
    public static void main(String args[])
    {
-      /* Set the Nimbus look and feel */
-      //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-      /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+	/* Set the Nimbus look and feel */
+	//<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+	/* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-       */
-      try
-      {
-         for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels())
-         {
-            if ("Nimbus".equals(info.getName()))
-            {
-               javax.swing.UIManager.setLookAndFeel(info.getClassName());
-               break;
-            }
-         }
-      } catch (ClassNotFoundException ex)
-      {
-         java.util.logging.Logger.getLogger(MapesUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-      } catch (InstantiationException ex)
-      {
-         java.util.logging.Logger.getLogger(MapesUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-      } catch (IllegalAccessException ex)
-      {
-         java.util.logging.Logger.getLogger(MapesUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-      } catch (javax.swing.UnsupportedLookAndFeelException ex)
-      {
-         java.util.logging.Logger.getLogger(MapesUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-      }
-      //</editor-fold>
+	 */
+	try
+	{
+	   for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels())
+	   {
+		if ("Nimbus".equals(info.getName()))
+		{
+		   javax.swing.UIManager.setLookAndFeel(info.getClassName());
+		   break;
+		}
+	   }
+	} catch (ClassNotFoundException ex)
+	{
+	   java.util.logging.Logger.getLogger(MapesUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+	} catch (InstantiationException ex)
+	{
+	   java.util.logging.Logger.getLogger(MapesUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+	} catch (IllegalAccessException ex)
+	{
+	   java.util.logging.Logger.getLogger(MapesUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+	} catch (javax.swing.UnsupportedLookAndFeelException ex)
+	{
+	   java.util.logging.Logger.getLogger(MapesUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+	}
+	//</editor-fold>
 
-      /* Create and display the form */
-      java.awt.EventQueue.invokeLater(new Runnable() {
-         public void run()
-         {
-            new MapesUI().setVisible(true);
-         }
-      });
+	/* Create and display the form */
+	java.awt.EventQueue.invokeLater(new Runnable() {
+	   public void run()
+	   {
+		new MapesUI().setVisible(true);
+	   }
+	});
    }
 
    // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -392,6 +446,7 @@ public class MapesUI extends javax.swing.JFrame {
    private javax.swing.JButton jButton6;
    private javax.swing.JButton jButton7;
    private javax.swing.JLabel jLabel1;
+   private javax.swing.JLabel jLabelAlbumTitleAndArtist;
    private javax.swing.JList<String> jList2;
    private javax.swing.JList<String> jList3;
    private javax.swing.JList<String> jListAlbums;
