@@ -13,19 +13,16 @@ import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 /**
  *
  * @author mre16utu
  */
 public class MapesUI extends javax.swing.JFrame {
 
-   AlbumCollection myAlbumCollection;
-   String workingDir = System.getProperty("user.dir");
+   private AlbumCollection myAlbumCollection;
+   private String workingDir = System.getProperty("user.dir");
+   // create an instance of MP3Player0 using default constructor
+   private static MP3Player0 mp3 = new MP3Player0();
 
    /**
     * Creates new form MapesUI
@@ -34,6 +31,7 @@ public class MapesUI extends javax.swing.JFrame {
    {
 	initComponents();
 	myAlbumCollection = new AlbumCollection();
+	mp3 = new MP3Player0();
    }
 
    /**
@@ -51,10 +49,10 @@ public class MapesUI extends javax.swing.JFrame {
       jScrollPane1 = new javax.swing.JScrollPane();
       jListAlbums = new javax.swing.JList<>();
       jScrollPane2 = new javax.swing.JScrollPane();
-      jList2 = new javax.swing.JList<>();
+      jListPlaylist = new javax.swing.JList<>();
       jLabel1 = new javax.swing.JLabel();
       jScrollPane3 = new javax.swing.JScrollPane();
-      jList3 = new javax.swing.JList<>();
+      jListTracks = new javax.swing.JList<>();
       jLabelAlbumTitleAndArtist = new javax.swing.JLabel();
       jButton1 = new javax.swing.JButton();
       jButton2 = new javax.swing.JButton();
@@ -83,24 +81,38 @@ public class MapesUI extends javax.swing.JFrame {
       });
       jScrollPane1.setViewportView(jListAlbums);
 
-      jList2.setModel(new javax.swing.AbstractListModel<String>()
+      jListPlaylist.setModel(new javax.swing.AbstractListModel<String>()
       {
          String[] strings = { "Playlist" };
          public int getSize() { return strings.length; }
          public String getElementAt(int i) { return strings[i]; }
       });
-      jScrollPane2.setViewportView(jList2);
+      jListPlaylist.addListSelectionListener(new javax.swing.event.ListSelectionListener()
+      {
+         public void valueChanged(javax.swing.event.ListSelectionEvent evt)
+         {
+            jListPlaylistValueChanged(evt);
+         }
+      });
+      jScrollPane2.setViewportView(jListPlaylist);
 
       jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
       jLabel1.setMinimumSize(new java.awt.Dimension(1, 1));
 
-      jList3.setModel(new javax.swing.AbstractListModel<String>()
+      jListTracks.setModel(new javax.swing.AbstractListModel<String>()
       {
          String[] strings = { "Track list for Album" };
          public int getSize() { return strings.length; }
          public String getElementAt(int i) { return strings[i]; }
       });
-      jScrollPane3.setViewportView(jList3);
+      jListTracks.addListSelectionListener(new javax.swing.event.ListSelectionListener()
+      {
+         public void valueChanged(javax.swing.event.ListSelectionEvent evt)
+         {
+            jListTracksValueChanged(evt);
+         }
+      });
+      jScrollPane3.setViewportView(jListTracks);
 
       javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
       jPanel1.setLayout(jPanel1Layout);
@@ -124,9 +136,9 @@ public class MapesUI extends javax.swing.JFrame {
             .addContainerGap()
             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                .addGroup(jPanel1Layout.createSequentialGroup()
-                  .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE)
+                  .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE)
                   .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                  .addComponent(jLabelAlbumTitleAndArtist, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                  .addComponent(jLabelAlbumTitleAndArtist, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
                   .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                   .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 158, Short.MAX_VALUE))
                .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING)
@@ -225,47 +237,92 @@ public class MapesUI extends javax.swing.JFrame {
       pack();
    }// </editor-fold>//GEN-END:initComponents
 
+   
+   /**
+    * Method to loop through folder and all subfolders and add mp3 files found 
+    * to list
+    * @param files
+    * @param folder 
+    */
+   private void getMp3AllSubDirs(List<File> files, File folder)
+   {
+	// get list of all files in folder
+	File[] fileList = folder.listFiles();
+	// loop over list of files check for file or directory
+	for(File file : fileList)
+	{
+//	   System.out.println(file.getName());
+	   // if file, check its mp3 and if so add to the list
+	   if(file.isFile())
+	   {
+		String ext = file.getName();
+		ext = ext.substring(ext.lastIndexOf(".") + 1);
+		if(ext.equals("mp3"))
+		{
+		   files.add(file);
+		}
+	   }
+	   // if file is a directory, call this method again to look for files 
+	   // further down that branch
+	   else if(file.isDirectory())
+	   {
+		getMp3AllSubDirs(files, file);
+	   }
+	}
+   }
+   
+   
+   
    private void jButtonPlayActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButtonPlayActionPerformed
    {//GEN-HEADEREND:event_jButtonPlayActionPerformed
-	// TODO add your handling code here:
+	System.out.println("Play Track");
+
+	// Get selected album title from album list
+	String trackTitle = jListTracks.getSelectedValue();
+	trackTitle = trackTitle.replaceAll(" ", "_");
+	System.out.println(trackTitle);
+
+	
+	File folder = new File(workingDir + "/audio/");
+	System.out.println(folder);
+
+	// create list to store all mp3 files 
+	List<File> files = new ArrayList<>();
+
+
+	getMp3AllSubDirs(files, folder);
+	File mp3File = null;
+	
+	for(File file : files)
+	{
+	   System.out.println(file.getName());
+	   if(file.getName().contains(trackTitle + ".mp3"))
+	   {
+		mp3File = file;
+		break;
+	   }
+	}
+
+	//MP3Player0 mp3 = new MP3Player0(filename); 
+	
+	mp3.play(mp3File.getAbsolutePath());
+	System.out.println("Playing mp3 file:" + mp3File.getName());
+	
+	// close works at this point
+	//mp3.close();
+
+
    }//GEN-LAST:event_jButtonPlayActionPerformed
 
    private void jButtonLoadAlbumsActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButtonLoadAlbumsActionPerformed
    {//GEN-HEADEREND:event_jButtonLoadAlbumsActionPerformed
 	System.out.println("Loading albums");
 
-	String filename="";
-	
-	// use JFileChooser to select album text file
-	try
-	{
-	   // launch file chooser in current working directory
-	   JFileChooser openFC = new JFileChooser(workingDir);
-	   FileFilter filter = new FileNameExtensionFilter("Text File", "txt");
-	   openFC.setFileFilter(filter);
-	   
-	   Component c1 = null;
-	   openFC.showOpenDialog(c1);
-
-	   File albumListing = openFC.getSelectedFile();
-	   filename = albumListing.getAbsolutePath();
-	   
-	   workingDir = albumListing.getParentFile().getAbsolutePath();
-
-	   System.out.println(filename);
-	   System.out.println(workingDir);
-	   
-	   //check the file format 
-	   String fileType = openFC.getTypeDescription(albumListing);
-	   System.out.println("file type = "+ fileType);
-	} 
-	catch (Exception e)
-	{
-	   System.err.println(e);
-	}
-	
-	
+	// prompt user to select text file containing album data
+	String filename = getTextFilePath();
+	// read album data into program and add to album collection
 	myAlbumCollection.readAlbumCollectionFromFile(filename);
+	// List albums in jList
 	DefaultListModel<String> albumList = new DefaultListModel<>();
 	jListAlbums.setModel(albumList);
 	for (Album album : myAlbumCollection.getAlbums())
@@ -277,12 +334,15 @@ public class MapesUI extends javax.swing.JFrame {
    private void jButtonLoadPlaylistActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButtonLoadPlaylistActionPerformed
    {//GEN-HEADEREND:event_jButtonLoadPlaylistActionPerformed
 	System.out.println("Loading playlist");
-	
-	// TODO add your handling code here:
+
+	// prompt user to select text file containing playlist info
+	String filename = getTextFilePath();
+	// create new playlist object and read playlist data into it
 	Playlist playlist = new Playlist(myAlbumCollection);
-	playlist.loadPlaylist("playlist.txt");
+	playlist.loadPlaylist(filename);
+	// List playlist tracks in jList
 	DefaultListModel<String> playListModel = new DefaultListModel<>();
-	jList2.setModel(playListModel);
+	jListPlaylist.setModel(playListModel);
 	for (PlaylistTrack track : playlist.getPlaylistTracks())
 	{
 	   playListModel.addElement(track.getTrackTitle());
@@ -292,6 +352,8 @@ public class MapesUI extends javax.swing.JFrame {
    private void jButtonStopActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButtonStopActionPerformed
    {//GEN-HEADEREND:event_jButtonStopActionPerformed
 	// TODO add your handling code here:
+	System.out.println("stopping mp3");
+	mp3.close();
    }//GEN-LAST:event_jButtonStopActionPerformed
 
    private void jListAlbumsValueChanged(javax.swing.event.ListSelectionEvent evt)//GEN-FIRST:event_jListAlbumsValueChanged
@@ -299,8 +361,9 @@ public class MapesUI extends javax.swing.JFrame {
 	// TODO add your handling code here:
 	//System.out.println("Item selected" + jListAlbums.getSelectedValue());
 	DefaultListModel<String> albumDetailsList = new DefaultListModel<>();
-	jList3.setModel(albumDetailsList);
+	jListTracks.setModel(albumDetailsList);
 
+	// Get selected album title from album list
 	String albumTitle = jListAlbums.getSelectedValue();
 	// Do nothing if 'Album List' placeholder selected
 	if (albumTitle != null && !albumTitle.equals("Album List"))
@@ -308,10 +371,11 @@ public class MapesUI extends javax.swing.JFrame {
 	   Album album = myAlbumCollection.getAlbumByTitle(albumTitle);
 	   String albumArtist = album.getAlbumArtist();
 
-	   // print album details to list
+	   // print album details to list - using html allows line breaks
 	   jLabelAlbumTitleAndArtist.setText("<html><body>Album Title &emsp;: "
 		     + albumTitle + "<br>Album Artist&emsp;: "
-		     + albumArtist + "</body></html>");
+		     + albumArtist + "<br>Album Duration&emsp;: "
+		     + album.getAlbumDuration() + "</body></html>");
 
 	   for (Track track : album.getTracks())
 	   {
@@ -321,7 +385,8 @@ public class MapesUI extends javax.swing.JFrame {
 	   // initiate a new image icon to display album cover
 	   ImageIcon image = new ImageIcon();
 	   // get list of image files
-	   File folder = new File("images/");
+	   File folder = new File(workingDir + "/images/");
+	   System.out.println(folder);
 
 	   File[] fileList = folder.listFiles();
 	   //List<File> fileList = new ArrayList<>(Arrays.asList(folder.listFiles()));
@@ -334,26 +399,36 @@ public class MapesUI extends javax.swing.JFrame {
 		   String fileName = file.getName();
 		   //System.out.println("Filename: " + fileName);
 		   String shortTitle = albumTitle.toLowerCase();
-		   // remove 'the' from start of album title
-		   if (shortTitle.substring(0, 4).equals("the "))
+
+		   // remove certain key words as 'special' examples. This is a 
+		   // system limitation and may not be robust. Consider renaming 
+		   // image files to consistent format and/or including artist in 
+		   // key string search
+		   // remove 'the' or 'neils' from start of album title
+		   if (shortTitle.startsWith("the "))
 		   {
 			shortTitle = shortTitle.substring(4, shortTitle.length());
+		   } else if (shortTitle.startsWith("neil's "))
+		   {
+			shortTitle = shortTitle.substring(7, shortTitle.length());
 		   }
+		   // remove trailing 'music' or 'album'
+		   if (shortTitle.endsWith(" album")
+			     || shortTitle.endsWith(" music"))
+		   {
+			shortTitle = shortTitle.substring(0, shortTitle.length() - 6);
+		   }
+
 		   // remove white space and special characters
 		   shortTitle = shortTitle.replaceAll("\\s+", "").replaceAll(
 			     "[-+.^:,?']", "").toLowerCase();
 
 		   // TODO include artist in file title search
-		   // 2nd part of the following OR is a special case designed for 
-		   // Neil's Heavy Concept Album. This is a system limitation and 
-		   // may not be robust. Consider renaming image files to consistent
-		   // format.
-		   if ((fileName.toLowerCase().contains(shortTitle))
-			     || (shortTitle.length() > 20 && fileName.toLowerCase().contains(
-			     shortTitle.substring(5, shortTitle.length() - 5))))
+		   if (fileName.toLowerCase().contains(shortTitle))
 		   {
 			//System.out.println("Match found");
-			ImageIcon tempImage = new ImageIcon("images/" + fileName);
+			ImageIcon tempImage = new ImageIcon(workingDir
+				  + "/images/" + fileName);
 			image = getScaledImage(tempImage, jLabel1);
 		   }
 		}
@@ -361,6 +436,18 @@ public class MapesUI extends javax.swing.JFrame {
 	   jLabel1.setIcon(image);
 	}
    }//GEN-LAST:event_jListAlbumsValueChanged
+
+   private void jListTracksValueChanged(javax.swing.event.ListSelectionEvent evt)//GEN-FIRST:event_jListTracksValueChanged
+   {//GEN-HEADEREND:event_jListTracksValueChanged
+	// TODO add your handling code here:
+	jListPlaylist.clearSelection();
+   }//GEN-LAST:event_jListTracksValueChanged
+
+   private void jListPlaylistValueChanged(javax.swing.event.ListSelectionEvent evt)//GEN-FIRST:event_jListPlaylistValueChanged
+   {//GEN-HEADEREND:event_jListPlaylistValueChanged
+	// TODO add your handling code here:
+	jListTracks.clearSelection();
+   }//GEN-LAST:event_jListPlaylistValueChanged
 
    // Method to get scaled dimensions of album cover
    private ImageIcon getScaledImage(ImageIcon image, JLabel jLabel)
@@ -391,6 +478,40 @@ public class MapesUI extends javax.swing.JFrame {
 	// create and return scaled image
 	return new ImageIcon(image.getImage().getScaledInstance(scaledWidth,
 		  scaledHeight, Image.SCALE_SMOOTH));
+   }
+
+   private String getTextFilePath()
+   {
+	// use JFileChooser to select album text file
+	try
+	{
+	   String filename = "";
+	   // launch file chooser in current working directory
+	   JFileChooser openFC = new JFileChooser(workingDir);
+	   FileFilter filter = new FileNameExtensionFilter("Text File", "txt");
+	   openFC.setFileFilter(filter);
+
+	   Component c1 = null;
+	   openFC.showOpenDialog(c1);
+
+	   File albumListing = openFC.getSelectedFile();
+	   filename = albumListing.getAbsolutePath();
+
+	   workingDir = albumListing.getParentFile().getAbsolutePath();
+
+	   System.out.println(filename);
+	   System.out.println(workingDir);
+
+	   //check the file format 
+	   String fileType = openFC.getTypeDescription(albumListing);
+	   System.out.println("file type = " + fileType);
+
+	   return filename;
+	} catch (Exception e)
+	{
+	   System.err.println(e);
+	}
+	return null;
    }
 
    /**
@@ -447,9 +568,9 @@ public class MapesUI extends javax.swing.JFrame {
    private javax.swing.JButton jButton7;
    private javax.swing.JLabel jLabel1;
    private javax.swing.JLabel jLabelAlbumTitleAndArtist;
-   private javax.swing.JList<String> jList2;
-   private javax.swing.JList<String> jList3;
    private javax.swing.JList<String> jListAlbums;
+   private javax.swing.JList<String> jListPlaylist;
+   private javax.swing.JList<String> jListTracks;
    private javax.swing.JPanel jPanel1;
    private javax.swing.JScrollPane jScrollPane1;
    private javax.swing.JScrollPane jScrollPane2;

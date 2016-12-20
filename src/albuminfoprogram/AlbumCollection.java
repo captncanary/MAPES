@@ -131,48 +131,41 @@ public class AlbumCollection {
 	   BufferedReader buffer;
 	   buffer = new BufferedReader(new FileReader(file));
 	   String currentLine;
+	   Album album = null;
 
 	   while ((currentLine = buffer.readLine()) != null)
 	   {
 		// Lines in the album data file begin with a letter when the line 
 		// contains an album title and artist, or an integer when it 
 		// contains track info
+		
 
 		// For each line, check whether first character is a letter. If so,
 		// assume we are at a new Album title/artist
 		if (Character.isLetter(currentLine.charAt(0)))
 		{
 		   // Album title found
-
-		   // Check if there are tracks in the albumTracks list
-		   if (albumTracks.size() > 0)
-		   {
-			// check that current album does not exist in collection
-			Album albumByTitle = this.getAlbumByTitle(albumTitle);
-			//System.out.println(albumByTitle == null);
-
-			//only add album if it is not in the album collection
-			if (albumByTitle == null || !albumByTitle.getAlbumArtist().equals(albumArtist))
-			{
-			   // We are at the end of the current album. Therefore, create
-			   // the album and add it to the album collection
-			   Album album = new Album(albumArtist, albumTitle, albumTracks);
-			   this.addAlbum(album);
-			}
-
-		   } else
-		   {
-			System.out.println("not adding " + albumTitle);
-		   }
-
+		   
 		   // Get Album title and artist from the current line
 		   String[] split = currentLine.split(":");
 		   albumArtist = split[0].trim();
 		   albumTitle = split[1].trim();
 
-		   // Create new list to contain tracks for this album
-		   albumTracks = new ArrayList<>();
-		} else // If first char is not a letter assume the line is a new track
+
+		   // check that current album does not exist in collection
+		   // try to get album by title
+		   Album albumByTitle = this.getAlbumByTitle(albumTitle);
+		   //only add album if albumByTitle returned null
+		   //TODO checking by artist will not work here as only first album by title found is returned. Need method to check for more albums of same name.
+		   if (albumByTitle == null || !albumByTitle.getAlbumArtist().equals(albumArtist))
+		   {
+			// We are at the end of the current album. Therefore, create
+			// the album and add it to the album collection
+			album = new Album(albumArtist, albumTitle);
+			this.addAlbum(album);
+		   }
+		}
+		else // If first char is not a letter assume the line is a new track
 		{
 		   // Track found - get its title and duration
 		   String[] split = currentLine.split("-", 2); // ', 2' prevents 
@@ -184,27 +177,10 @@ public class AlbumCollection {
 		   Duration trackDuration = new Duration(strTrackDuration);
 		   // create track object and add to album track list
 		   Track track = new Track(trackTitle, trackDuration);
-		   albumTracks.add(track);
+		   album.addTrack(track);
 		}
 	   }
-	   // We are at the end of the final album. Therefore, create
-	   // the album and add it to the album collection if there are tracks in
-	   // albumTracks
-	   if (albumTracks.size() > 0)
-	   {
-		// check that current album does not exist in collection
-		Album albumByTitle = this.getAlbumByTitle(albumTitle);
-		//System.out.println(albumByTitle == null);
 
-		//only add album if it is not in the album collection
-		if (albumByTitle == null || !albumByTitle.getAlbumArtist().equals(albumArtist))
-		{
-		   // We are at the end of the current album. Therefore, create
-		   // the album and add it to the album collection
-		   Album album = new Album(albumArtist, albumTitle, albumTracks);
-		   this.addAlbum(album);
-		}
-	   }
 	} catch (IOException e)
 	{
 	   // if error occurs, print the IOException

@@ -19,6 +19,13 @@ public class Album implements Comparable<Album> {
    private final List<Track> tracks;
 
    // begin Constructors
+   public Album(String artist, String title)
+   {
+      this.artist = artist;
+      this.title  = title;
+      this.tracks = new ArrayList<>();
+   }
+   
    public Album(String artist, String title, List<Track> tracks)
    {
       this.artist = artist;
@@ -75,6 +82,12 @@ public class Album implements Comparable<Album> {
          }
       }
       return longestTrack;
+   }
+   
+   // Method to add tracks to album
+   public void addTrack(Track track)
+   {
+	this.tracks.add(track);
    }
    
    // Method to return Track from Album given supplied trackTitle string
