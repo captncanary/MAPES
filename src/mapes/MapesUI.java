@@ -5,10 +5,16 @@ import albuminfoprogram.AlbumCollection;
 import albuminfoprogram.Playlist;
 import albuminfoprogram.PlaylistTrack;
 import albuminfoprogram.Track;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Image;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -19,19 +25,33 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  */
 public class MapesUI extends javax.swing.JFrame {
 
-   private AlbumCollection myAlbumCollection;
+   private final AlbumCollection myAlbumCollection;
    private String workingDir = System.getProperty("user.dir");
    // create an instance of MP3Player0 using default constructor
-   private static MP3Player0 mp3 = new MP3Player0();
-
+   private static MP3Player0 mp3;// = new MP3Player0();
+   private DefaultListModel<String> playListModel;
+   // Hashmap to store track title and album details of playlist items
+   private HashMap<String, String> trackAlbumHashMap;
+   
    /**
     * Creates new form MapesUI
     */
    public MapesUI()
    {
 	initComponents();
+	// Set background color of the jFrame
+	this.getContentPane().setBackground(new Color(0x4c4c4c));
+	// initial album collection and mp3player
 	myAlbumCollection = new AlbumCollection();
 	mp3 = new MP3Player0();
+	// Initialise playListModel and set it as model for jListPlaylist so that 
+	// playlists can be immediately built by user after album load
+	playListModel = new DefaultListModel<>();
+	jListPlaylist.setModel(playListModel);
+	// add 'Playlist' to model in order to show user this is the playlist list
+	playListModel.addElement("Playlist");
+	// initialise track to album details hashmap
+	trackAlbumHashMap = new HashMap<>();
    }
 
    /**
@@ -43,6 +63,7 @@ public class MapesUI extends javax.swing.JFrame {
    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
    private void initComponents()
    {
+      bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
 
       jButton3 = new javax.swing.JButton();
       jPanel1 = new javax.swing.JPanel();
@@ -54,24 +75,37 @@ public class MapesUI extends javax.swing.JFrame {
       jScrollPane3 = new javax.swing.JScrollPane();
       jListTracks = new javax.swing.JList<>();
       jLabelAlbumTitleAndArtist = new javax.swing.JLabel();
+      jLabel2 = new javax.swing.JLabel();
       jButton1 = new javax.swing.JButton();
       jButton2 = new javax.swing.JButton();
-      jButton4 = new javax.swing.JButton();
-      jButton5 = new javax.swing.JButton();
+      jButtonSavePlaylist = new javax.swing.JButton();
+      jButtonRemoveTrack = new javax.swing.JButton();
+      jButtonAddTrack = new javax.swing.JButton();
+      jButtonClearPlaylist = new javax.swing.JButton();
+      jPanel2 = new javax.swing.JPanel();
       jButton6 = new javax.swing.JButton();
+      jButton4 = new javax.swing.JButton();
       jButton7 = new javax.swing.JButton();
+      jButton5 = new javax.swing.JButton();
 
       jButton3.setText("jButton3");
 
       setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+      setTitle("Music Album and Playlist Editing System");
 
+      jPanel1.setBackground(new java.awt.Color(76, 76, 76));
+
+      jListAlbums.setBackground(new java.awt.Color(76, 76, 76));
+      jListAlbums.setForeground(new java.awt.Color(255, 255, 255));
       jListAlbums.setModel(new javax.swing.AbstractListModel<String>()
       {
          String[] strings = { "Album List" };
          public int getSize() { return strings.length; }
          public String getElementAt(int i) { return strings[i]; }
       });
+      jListAlbums.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
       jListAlbums.setName("Album List"); // NOI18N
+      jListAlbums.setSelectionBackground(new java.awt.Color(51, 181, 229));
       jListAlbums.addListSelectionListener(new javax.swing.event.ListSelectionListener()
       {
          public void valueChanged(javax.swing.event.ListSelectionEvent evt)
@@ -81,12 +115,16 @@ public class MapesUI extends javax.swing.JFrame {
       });
       jScrollPane1.setViewportView(jListAlbums);
 
+      jListPlaylist.setBackground(new java.awt.Color(76, 76, 76));
+      jListPlaylist.setForeground(new java.awt.Color(255, 255, 255));
       jListPlaylist.setModel(new javax.swing.AbstractListModel<String>()
       {
          String[] strings = { "Playlist" };
          public int getSize() { return strings.length; }
          public String getElementAt(int i) { return strings[i]; }
       });
+      jListPlaylist.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+      jListPlaylist.setSelectionBackground(new java.awt.Color(51, 181, 229));
       jListPlaylist.addListSelectionListener(new javax.swing.event.ListSelectionListener()
       {
          public void valueChanged(javax.swing.event.ListSelectionEvent evt)
@@ -99,12 +137,16 @@ public class MapesUI extends javax.swing.JFrame {
       jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
       jLabel1.setMinimumSize(new java.awt.Dimension(1, 1));
 
+      jListTracks.setBackground(new java.awt.Color(76, 76, 76));
+      jListTracks.setForeground(new java.awt.Color(255, 255, 255));
       jListTracks.setModel(new javax.swing.AbstractListModel<String>()
       {
          String[] strings = { "Track list for Album" };
          public int getSize() { return strings.length; }
          public String getElementAt(int i) { return strings[i]; }
       });
+      jListTracks.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+      jListTracks.setSelectionBackground(new java.awt.Color(51, 181, 229));
       jListTracks.addListSelectionListener(new javax.swing.event.ListSelectionListener()
       {
          public void valueChanged(javax.swing.event.ListSelectionEvent evt)
@@ -114,6 +156,12 @@ public class MapesUI extends javax.swing.JFrame {
       });
       jScrollPane3.setViewportView(jListTracks);
 
+      jLabelAlbumTitleAndArtist.setBackground(new java.awt.Color(76, 76, 76));
+      jLabelAlbumTitleAndArtist.setForeground(new java.awt.Color(255, 255, 255));
+      jLabelAlbumTitleAndArtist.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+
+      jLabel2.setText("jLabel2");
+
       javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
       jPanel1.setLayout(jPanel1Layout);
       jPanel1Layout.setHorizontalGroup(
@@ -122,12 +170,14 @@ public class MapesUI extends javax.swing.JFrame {
             .addContainerGap()
             .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-               .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-               .addComponent(jScrollPane3)
-               .addComponent(jLabelAlbumTitleAndArtist, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+               .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 423, Short.MAX_VALUE)
+               .addComponent(jLabelAlbumTitleAndArtist, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+               .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 212, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+               .addComponent(jScrollPane2)
+               .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addContainerGap())
       );
       jPanel1Layout.setVerticalGroup(
@@ -136,19 +186,24 @@ public class MapesUI extends javax.swing.JFrame {
             .addContainerGap()
             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                .addGroup(jPanel1Layout.createSequentialGroup()
-                  .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE)
+                  .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 243, javax.swing.GroupLayout.PREFERRED_SIZE)
                   .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                  .addComponent(jLabelAlbumTitleAndArtist, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
+                  .addComponent(jLabelAlbumTitleAndArtist, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
                   .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                  .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 158, Short.MAX_VALUE))
-               .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING)
-               .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING))
+                  .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 141, Short.MAX_VALUE))
+               .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)
+               .addGroup(jPanel1Layout.createSequentialGroup()
+                  .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 373, javax.swing.GroupLayout.PREFERRED_SIZE)
+                  .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                  .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
             .addContainerGap())
       );
 
       jLabelAlbumTitleAndArtist.getAccessibleContext().setAccessibleName("jLabelAlbumTitleAndArtist");
       jLabelAlbumTitleAndArtist.getAccessibleContext().setAccessibleDescription("");
 
+      jButton1.setBackground(new java.awt.Color(76, 76, 76));
+      jButton1.setForeground(new java.awt.Color(255, 255, 255));
       jButton1.setText("Load Albums");
       jButton1.addActionListener(new java.awt.event.ActionListener()
       {
@@ -158,6 +213,8 @@ public class MapesUI extends javax.swing.JFrame {
          }
       });
 
+      jButton2.setBackground(new java.awt.Color(76, 76, 76));
+      jButton2.setForeground(new java.awt.Color(255, 255, 255));
       jButton2.setText("Load Playlist");
       jButton2.setToolTipText("");
       jButton2.addActionListener(new java.awt.event.ActionListener()
@@ -168,6 +225,52 @@ public class MapesUI extends javax.swing.JFrame {
          }
       });
 
+      jButtonSavePlaylist.setBackground(new java.awt.Color(76, 76, 76));
+      jButtonSavePlaylist.setForeground(new java.awt.Color(255, 255, 255));
+      jButtonSavePlaylist.setText("Save Playlist");
+      jButtonSavePlaylist.addActionListener(new java.awt.event.ActionListener()
+      {
+         public void actionPerformed(java.awt.event.ActionEvent evt)
+         {
+            jButtonSavePlaylistActionPerformed(evt);
+         }
+      });
+
+      jButtonRemoveTrack.setText("<<");
+      jButtonRemoveTrack.addActionListener(new java.awt.event.ActionListener()
+      {
+         public void actionPerformed(java.awt.event.ActionEvent evt)
+         {
+            jButtonRemoveTrackActionPerformed(evt);
+         }
+      });
+
+      jButtonAddTrack.setText(">>");
+      jButtonAddTrack.addActionListener(new java.awt.event.ActionListener()
+      {
+         public void actionPerformed(java.awt.event.ActionEvent evt)
+         {
+            jButtonAddTrackActionPerformed(evt);
+         }
+      });
+
+      jButtonClearPlaylist.setText("Clear Playlist");
+      jButtonClearPlaylist.addActionListener(new java.awt.event.ActionListener()
+      {
+         public void actionPerformed(java.awt.event.ActionEvent evt)
+         {
+            jButtonClearPlaylistActionPerformed(evt);
+         }
+      });
+
+      jPanel2.setBackground(new java.awt.Color(76, 76, 76));
+      jPanel2.setForeground(new java.awt.Color(76, 76, 76));
+
+      org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, jListTracks, org.jdesktop.beansbinding.ELProperty.create("${alignmentX}"), jPanel2, org.jdesktop.beansbinding.BeanProperty.create("alignmentX"));
+      bindingGroup.addBinding(binding);
+
+      jButton6.setText("Back");
+
       jButton4.setText("Play");
       jButton4.addActionListener(new java.awt.event.ActionListener()
       {
@@ -176,10 +279,6 @@ public class MapesUI extends javax.swing.JFrame {
             jButtonPlayActionPerformed(evt);
          }
       });
-
-      jButton5.setText("Forward");
-
-      jButton6.setText("Back");
 
       jButton7.setText("Stop");
       jButton7.setToolTipText("");
@@ -191,30 +290,62 @@ public class MapesUI extends javax.swing.JFrame {
          }
       });
 
+      jButton5.setText("Forward");
+
+      javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+      jPanel2.setLayout(jPanel2Layout);
+      jPanel2Layout.setHorizontalGroup(
+         jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+         .addGroup(jPanel2Layout.createSequentialGroup()
+            .addGap(83, 83, 83)
+            .addComponent(jButton6)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(jButton4)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(jButton7)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(jButton5)
+            .addContainerGap(85, Short.MAX_VALUE))
+      );
+      jPanel2Layout.setVerticalGroup(
+         jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+         .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+            .addGap(0, 0, Short.MAX_VALUE)
+            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+               .addComponent(jButton6)
+               .addComponent(jButton4)
+               .addComponent(jButton7)
+               .addComponent(jButton5)))
+      );
+
       javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
       getContentPane().setLayout(layout);
       layout.setHorizontalGroup(
          layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
          .addGroup(layout.createSequentialGroup()
-            .addContainerGap()
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addContainerGap())
-         .addGroup(layout.createSequentialGroup()
-            .addGap(304, 304, 304)
-            .addComponent(jButton6)
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addComponent(jButton4)
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jButton7)
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addComponent(jButton5)
-            .addGap(300, 300, 300))
-         .addGroup(layout.createSequentialGroup()
             .addGap(80, 80, 80)
             .addComponent(jButton1)
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jButton2)
-            .addGap(72, 72, 72))
+            .addGap(18, 18, 18)
+            .addComponent(jButtonSavePlaylist)
+            .addGap(21, 21, 21))
+         .addGroup(layout.createSequentialGroup()
+            .addContainerGap()
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+               .addGroup(layout.createSequentialGroup()
+                  .addGap(248, 248, 248)
+                  .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                  .addGap(18, 18, Short.MAX_VALUE)
+                  .addComponent(jButtonRemoveTrack)
+                  .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                  .addComponent(jButtonClearPlaylist)
+                  .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                  .addComponent(jButtonAddTrack)
+                  .addGap(29, 29, 29))
+               .addGroup(layout.createSequentialGroup()
+                  .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                  .addContainerGap())))
       );
       layout.setVerticalGroup(
          layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -222,17 +353,23 @@ public class MapesUI extends javax.swing.JFrame {
             .addContainerGap()
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                .addComponent(jButton1)
-               .addComponent(jButton2))
+               .addComponent(jButton2)
+               .addComponent(jButtonSavePlaylist))
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-               .addComponent(jButton4)
-               .addComponent(jButton5)
-               .addComponent(jButton6)
-               .addComponent(jButton7))
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+               .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                  .addComponent(jButtonRemoveTrack)
+                  .addComponent(jButtonClearPlaylist)
+                  .addComponent(jButtonAddTrack))
+               .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addContainerGap())
       );
+
+      jButtonSavePlaylist.getAccessibleContext().setAccessibleDescription("");
+
+      bindingGroup.bind();
 
       pack();
    }// </editor-fold>//GEN-END:initComponents
@@ -277,40 +414,64 @@ public class MapesUI extends javax.swing.JFrame {
    {//GEN-HEADEREND:event_jButtonPlayActionPerformed
 	System.out.println("Play Track");
 
-	// Get selected album title from album list
-	String trackTitle = jListTracks.getSelectedValue();
-	trackTitle = trackTitle.replaceAll(" ", "_");
-	System.out.println(trackTitle);
-
-	
-	File folder = new File(workingDir + "/audio/");
-	System.out.println(folder);
-
-	// create list to store all mp3 files 
-	List<File> files = new ArrayList<>();
-
-
-	getMp3AllSubDirs(files, folder);
-	File mp3File = null;
-	
-	for(File file : files)
+	// Get selected track title from tracklist or playlist
+	String trackTitle = null;
+	if(jListTracks.getSelectedIndex() > -1)
 	{
-	   System.out.println(file.getName());
-	   if(file.getName().contains(trackTitle + ".mp3"))
-	   {
-		mp3File = file;
-		break;
-	   }
+	   trackTitle = jListTracks.getSelectedValue();
 	}
-
-	//MP3Player0 mp3 = new MP3Player0(filename); 
+	else if (jListPlaylist.getSelectedIndex() > -1)
+	{
+	   trackTitle = jListPlaylist.getSelectedValue();
+	}
 	
-	mp3.play(mp3File.getAbsolutePath());
-	System.out.println("Playing mp3 file:" + mp3File.getName());
 	
-	// close works at this point
-	//mp3.close();
+	if(trackTitle != null && trackTitle != "Playlist")
+	{
+	   // remove duration from track title
+	   trackTitle = trackTitle.split("-", 2)[1].trim();
+	   // convert trackTitle to audio file name format
+	   trackTitle = trackTitle.replaceAll(" ", "_").toLowerCase();
+	   System.out.println(trackTitle);
 
+
+	   File folder = new File(workingDir + "/audio/");
+	   System.out.println(folder);
+
+	   // create list to store all mp3 files 
+	   List<File> files = new ArrayList<>();
+
+
+	   getMp3AllSubDirs(files, folder);
+	   File mp3File = null;
+	   boolean fileFound = false;
+	   for(File file : files)
+	   {
+		System.out.println(file.getName());
+		if(file.getName().toLowerCase().contains("_" + trackTitle + ".mp3"))
+		{
+		   mp3File = file;
+		   fileFound = true;
+		   break;
+		}
+	   }
+	   
+	   if(fileFound)
+	   {
+		mp3.close();
+		mp3.play(mp3File.getAbsolutePath());
+	   System.out.println("Playing mp3 file:" + mp3File.getName());
+	   }
+	   else
+	   {
+		System.out.println("Track file not found");
+	   }
+	   
+	}
+	else
+	{
+	   System.out.println("No track selected");
+	}
 
    }//GEN-LAST:event_jButtonPlayActionPerformed
 
@@ -319,7 +480,7 @@ public class MapesUI extends javax.swing.JFrame {
 	System.out.println("Loading albums");
 
 	// prompt user to select text file containing album data
-	String filename = getTextFilePath();
+	String filename = getTextFilePath("LOAD");
 	// read album data into program and add to album collection
 	myAlbumCollection.readAlbumCollectionFromFile(filename);
 	// List albums in jList
@@ -327,7 +488,7 @@ public class MapesUI extends javax.swing.JFrame {
 	jListAlbums.setModel(albumList);
 	for (Album album : myAlbumCollection.getAlbums())
 	{
-	   albumList.addElement(album.getAlbumTitle());
+	   albumList.addElement(album.getAlbumArtist() + " : " + album.getAlbumTitle());
 	}
    }//GEN-LAST:event_jButtonLoadAlbumsActionPerformed
 
@@ -336,16 +497,16 @@ public class MapesUI extends javax.swing.JFrame {
 	System.out.println("Loading playlist");
 
 	// prompt user to select text file containing playlist info
-	String filename = getTextFilePath();
+	String filename = getTextFilePath("LOAD");
 	// create new playlist object and read playlist data into it
 	Playlist playlist = new Playlist(myAlbumCollection);
 	playlist.loadPlaylist(filename);
 	// List playlist tracks in jList
-	DefaultListModel<String> playListModel = new DefaultListModel<>();
+	playListModel = new DefaultListModel<>();
 	jListPlaylist.setModel(playListModel);
 	for (PlaylistTrack track : playlist.getPlaylistTracks())
 	{
-	   playListModel.addElement(track.getTrackTitle());
+	   playListModel.addElement(track.getTrackDuration() + " - " + track.getTrackTitle());
 	}
    }//GEN-LAST:event_jButtonLoadPlaylistActionPerformed
 
@@ -365,21 +526,26 @@ public class MapesUI extends javax.swing.JFrame {
 
 	// Get selected album title from album list
 	String albumTitle = jListAlbums.getSelectedValue();
+	
 	// Do nothing if 'Album List' placeholder selected
 	if (albumTitle != null && !albumTitle.equals("Album List"))
 	{
+	   albumTitle = albumTitle.split(":", 2)[1].trim();
 	   Album album = myAlbumCollection.getAlbumByTitle(albumTitle);
 	   String albumArtist = album.getAlbumArtist();
 
-	   // print album details to list - using html allows line breaks
-	   jLabelAlbumTitleAndArtist.setText("<html><body>Album Title &emsp;: "
-		     + albumTitle + "<br>Album Artist&emsp;: "
-		     + albumArtist + "<br>Album Duration&emsp;: "
-		     + album.getAlbumDuration() + "</body></html>");
+//	   // print album details to list - using html allows line breaks
+//	   jLabelAlbumTitleAndArtist.setText("<html><body>Album Title &emsp;: "
+//		     + albumTitle + "<br>Album Artist&emsp;: "
+//		     + albumArtist + "<br>Album Duration&emsp;: "
+//		     + album.getAlbumDuration() + "</body></html>");
+	   jLabelAlbumTitleAndArtist.setText(albumArtist + " : " + albumTitle 
+				     + " (Duration: " + album.getAlbumDuration() + ")");
 
 	   for (Track track : album.getTracks())
 	   {
-		albumDetailsList.addElement(track.getTrackTitle());
+		albumDetailsList.addElement(track.getTrackDuration() + " - "
+									+ track.getTrackTitle());
 	   }
 
 	   // initiate a new image icon to display album cover
@@ -439,15 +605,100 @@ public class MapesUI extends javax.swing.JFrame {
 
    private void jListTracksValueChanged(javax.swing.event.ListSelectionEvent evt)//GEN-FIRST:event_jListTracksValueChanged
    {//GEN-HEADEREND:event_jListTracksValueChanged
-	// TODO add your handling code here:
-	jListPlaylist.clearSelection();
+	// Clear playlist selection if item being selected in tracks list. Ensure 
+	// this is not triggered by a deselect event from playlistValueChanged
+	if(jListTracks.getValueIsAdjusting())
+	{
+	   jListPlaylist.clearSelection();
+	}
+	
    }//GEN-LAST:event_jListTracksValueChanged
 
+   // Clear track list selection if item being selected in playlist. Ensure 
+   // this is not triggered by a deselect event from TracksValueChanged
    private void jListPlaylistValueChanged(javax.swing.event.ListSelectionEvent evt)//GEN-FIRST:event_jListPlaylistValueChanged
    {//GEN-HEADEREND:event_jListPlaylistValueChanged
 	// TODO add your handling code here:
-	jListTracks.clearSelection();
+	if(jListPlaylist.getValueIsAdjusting())
+	{
+	   jListTracks.clearSelection();
+	}
+	
    }//GEN-LAST:event_jListPlaylistValueChanged
+
+   private void jButtonSavePlaylistActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButtonSavePlaylistActionPerformed
+   {//GEN-HEADEREND:event_jButtonSavePlaylistActionPerformed
+	try
+	{
+	   // TODO get tracks from playlist and save as file:
+	   String filename = getTextFilePath("SAVE");
+	   if(!filename.endsWith(".txt"))
+	   {
+		filename += ".txt";
+	   }
+	   BufferedWriter bw = new BufferedWriter(new FileWriter(filename));
+	   
+	   int iMax = playListModel.getSize();
+	   for (int i = 0; i < iMax; i++)
+	   {
+		String trackStr = playListModel.getElementAt(i);
+		String[] split = trackStr.split(" - ", 2);
+		String track = split[1];
+		System.out.println("Track: " + track);
+//		String duration = split[0];
+
+		//String albumStr = trackAlbumHashMap.get(track);
+		track += " (" + trackAlbumHashMap.get(trackStr) + ")";
+//		
+//		myAlbumCollection.getAlbumByTitle(track);
+		// Write output to bufferedWriter
+		bw.write(track);
+		bw.newLine();
+	   }
+	   bw.flush();
+	} 
+	catch (Exception ex)
+	{
+	   Logger.getLogger(MapesUI.class.getName()).log(Level.SEVERE, null, ex);
+	}
+	
+   }//GEN-LAST:event_jButtonSavePlaylistActionPerformed
+
+   private void jButtonAddTrackActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButtonAddTrackActionPerformed
+   {//GEN-HEADEREND:event_jButtonAddTrackActionPerformed
+      // Add a track from list of album tracks to the playlist
+	if(playListModel.getSize() == 1 && 
+					    playListModel.elementAt(0).equals("Playlist"))
+	{
+	   playListModel.removeElementAt(0);
+	}
+	playListModel.addElement(jListTracks.getSelectedValue());
+	
+	// Store track title and album details of playlist items in hashmap
+	System.out.println("Adding: " + jListTracks.getSelectedValue()+ ", " +
+							      jListAlbums.getSelectedValue());
+	trackAlbumHashMap.put(jListTracks.getSelectedValue(),
+							      jListAlbums.getSelectedValue());
+	System.out.println(trackAlbumHashMap.get(jListTracks.getSelectedValue()));
+   }//GEN-LAST:event_jButtonAddTrackActionPerformed
+
+   private void jButtonRemoveTrackActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButtonRemoveTrackActionPerformed
+   {//GEN-HEADEREND:event_jButtonRemoveTrackActionPerformed
+      // Remove track from playlist and tracking hashmap if track selected
+	if(jListPlaylist.getSelectedIndex() > -1)
+	{
+	   playListModel.remove(jListPlaylist.getSelectedIndex());
+	   trackAlbumHashMap.remove(jListPlaylist.getSelectedValue());
+	}
+	
+   }//GEN-LAST:event_jButtonRemoveTrackActionPerformed
+
+   private void jButtonClearPlaylistActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jButtonClearPlaylistActionPerformed
+   {//GEN-HEADEREND:event_jButtonClearPlaylistActionPerformed
+      // TODO add your handling code here:
+	playListModel.clear();
+	trackAlbumHashMap.clear();
+   }//GEN-LAST:event_jButtonClearPlaylistActionPerformed
 
    // Method to get scaled dimensions of album cover
    private ImageIcon getScaledImage(ImageIcon image, JLabel jLabel)
@@ -480,21 +731,31 @@ public class MapesUI extends javax.swing.JFrame {
 		  scaledHeight, Image.SCALE_SMOOTH));
    }
 
-   private String getTextFilePath()
+   private String getTextFilePath(String option)
    {
 	// use JFileChooser to select album text file
 	try
 	{
 	   String filename = "";
 	   // launch file chooser in current working directory
-	   JFileChooser openFC = new JFileChooser(workingDir);
+	   JFileChooser fileChooser = new JFileChooser(workingDir);
 	   FileFilter filter = new FileNameExtensionFilter("Text File", "txt");
-	   openFC.setFileFilter(filter);
+	   fileChooser.setFileFilter(filter);
 
 	   Component c1 = null;
-	   openFC.showOpenDialog(c1);
+	   
+	   if(option.equals("LOAD"))
+	   {
+		fileChooser.showOpenDialog(c1);
+	   }
+	   else if(option.equals("SAVE"))
+	   {
+		fileChooser.showSaveDialog(c1);
+	   }
+	   
+	   
 
-	   File albumListing = openFC.getSelectedFile();
+	   File albumListing = fileChooser.getSelectedFile();
 	   filename = albumListing.getAbsolutePath();
 
 	   workingDir = albumListing.getParentFile().getAbsolutePath();
@@ -503,7 +764,7 @@ public class MapesUI extends javax.swing.JFrame {
 	   System.out.println(workingDir);
 
 	   //check the file format 
-	   String fileType = openFC.getTypeDescription(albumListing);
+	   String fileType = fileChooser.getTypeDescription(albumListing);
 	   System.out.println("file type = " + fileType);
 
 	   return filename;
@@ -566,14 +827,21 @@ public class MapesUI extends javax.swing.JFrame {
    private javax.swing.JButton jButton5;
    private javax.swing.JButton jButton6;
    private javax.swing.JButton jButton7;
+   private javax.swing.JButton jButtonAddTrack;
+   private javax.swing.JButton jButtonClearPlaylist;
+   private javax.swing.JButton jButtonRemoveTrack;
+   private javax.swing.JButton jButtonSavePlaylist;
    private javax.swing.JLabel jLabel1;
+   private javax.swing.JLabel jLabel2;
    private javax.swing.JLabel jLabelAlbumTitleAndArtist;
    private javax.swing.JList<String> jListAlbums;
    private javax.swing.JList<String> jListPlaylist;
    private javax.swing.JList<String> jListTracks;
    private javax.swing.JPanel jPanel1;
+   private javax.swing.JPanel jPanel2;
    private javax.swing.JScrollPane jScrollPane1;
    private javax.swing.JScrollPane jScrollPane2;
    private javax.swing.JScrollPane jScrollPane3;
+   private org.jdesktop.beansbinding.BindingGroup bindingGroup;
    // End of variables declaration//GEN-END:variables
 }

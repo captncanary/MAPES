@@ -140,8 +140,8 @@ public class Duration implements Comparable<Duration> {
    @Override
    public String toString()
    {
-      // returns duration in hh:mm:ss string format
-      return decFormat.format(hours) + ":" 
+      // returns duration in h:mm:ss string format
+      return (hours) + ":" 
            + decFormat.format(minutes) + ":" 
            + decFormat.format(seconds);
    }

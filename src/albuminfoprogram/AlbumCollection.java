@@ -165,7 +165,8 @@ public class AlbumCollection {
 			this.addAlbum(album);
 		   }
 		}
-		else // If first char is not a letter assume the line is a new track
+		// If first char is not a letter assume the line is a new track
+		else if (album != null)
 		{
 		   // Track found - get its title and duration
 		   String[] split = currentLine.split("-", 2); // ', 2' prevents 
