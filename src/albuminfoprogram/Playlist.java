@@ -62,7 +62,29 @@ public class Playlist {
    {
       return albumCollection;
    }
+   
+   //
+   public PlaylistTrack getTrackByNameAndDuration(String title, String duration)
+   {
+	//PlaylistTrack track;
+	for(PlaylistTrack plTrack : playlistTracks)
+	{
+	   if(plTrack.getTrackTitle().equals(title) && plTrack.getTrackDuration().toString().equals(duration))
+	   {
+		return plTrack;
+	   }
+	}
+	
+      return null;
+   }
    // End Getters
+   
+   // Begin Setters
+   public void clearPlaylist()
+   {
+	playlistTracks.clear();
+   }
+   // End Setters
    
    // Method allowing playlist tracks to be added to playlist
    public void addPlaylistTrack(PlaylistTrack playlistTrack)
